@@ -2,15 +2,31 @@ import React from 'react';
 import getStroke from "perfect-freehand"
 import './content.scss';
 
-const Newtab = () => {
+let enabled = false;
+chrome.storage.onChanged.addListener(function (changes, namespace) {
+  for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
+    console.log(
+      `Storage key "${key}" in namespace "${namespace}" changed.`,
+      `Old value was "${oldValue}", new value is "${newValue}".`
+    );
+
+    if(key === 'enabled') {
+      enabled = newValue;
+    }
+  }
+});
+
+const Content = () => {
   const [paths, setPaths] = React.useState([])
 
   function handlePointerDown(e) {
     e.preventDefault()
+    if(!enabled) return;
     setPaths([ ...paths, [[e.pageX, e.pageY, e.pressure]]])
   }
 
   function handlePointerMove(e) {
+    if(!enabled) return;
     if (e.buttons === 1) {
       e.preventDefault()
 
@@ -23,6 +39,7 @@ const Newtab = () => {
   }
   return (
     <div className="App">
+      {enabled ? 'enabled' : 'disabled'}
       <svg
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
@@ -33,7 +50,7 @@ const Newtab = () => {
             key={'path'+i}
             d={getSvgPathFromStroke(
               getStroke(points, {
-                size: 8,
+                size: 15,
                 thinning: 0.5,
                 smoothing: 0.5,
                 streamline: 0.5,
@@ -74,4 +91,4 @@ export function getSvgPathFromStroke(stroke) {
 }
 
 
-export default Newtab;
+export default Content;

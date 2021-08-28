@@ -1,19 +1,32 @@
 import React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import logo from '../../assets/img/logo.svg';
 import './Popup.css';
 
 const Popup = () => {
   const [toggle, setToggle] = useState(false)
 
+  useEffect(() => {
+    // chrome.storage.local.get({ 'enabled': !toggle }, function () {
+    //   console.log("confirmed");
+    //   setToggle(!toggle);
+    // });
+
+    chrome.storage.local.get(['enabled'], function(result) {
+      debugger;
+      console.log({ result: result.enabled })
+      setToggle(result.enabled);
+    });
+  }, [])
+
   function clickToggle(e) {
-    setToggle(!toggle);
     // chrome.tabs.query({active: true, currentWindow: true}, tabs => {
     //   chrome.tabs.sendMessage(tabs[0].id, toggle);
     // }).bind(this);
-    chrome.storage.local.set({ 'enabled': toggle }, function () {
+    chrome.storage.local.set({ 'enabled': !toggle }, function () {
       console.log("confirmed");
-  });
+      setToggle(!toggle);
+    });
   }
 
   return (
